@@ -4,7 +4,7 @@ import typing
 import dataclasses
 import copy
 
-from .base_class import LoadableDataclass
+from database.base_class import LoadableDataclass
 
 class Record:
     """Base class used to interface with the Database.

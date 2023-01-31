@@ -1,9 +1,9 @@
 import dotenv
-dotenv.load_dotenv()
+dotenv.load_dotenv('local.env')
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-from .request_handler import (
+from request_handler import (
     Request,
     Response,
     handle_request,
@@ -33,7 +33,7 @@ class PTDHandler(BaseHTTPRequestHandler):
         #     file.write('\n')
 
         try:
-            response: Response = handle_request(Request(self.command, self.path, body))
+            response: Response = handle_request(Request.from_http(self.path, body))
         except Exception:
             self.send_response(500, 'INTERNAL SERVER ERROR')
             self.end_headers()
@@ -42,13 +42,13 @@ class PTDHandler(BaseHTTPRequestHandler):
             # print(response)
             self.send_response(200, 'OK')
             self.end_headers()
-            self.wfile.write(response.encode())
+            self.wfile.write(response.encode_http())
 
 
 def run(server_class=HTTPServer, handler_class=PTDHandler):
     server_address = ('', 1234)
-    httpd = server_class(server_address, handler_class)
-    httpd.serve_forever()
+    server = server_class(server_address, handler_class)
+    server.serve_forever()
 
 if __name__ == '__main__':
     run()

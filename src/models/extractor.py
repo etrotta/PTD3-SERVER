@@ -1,4 +1,4 @@
-from .data_numbers import Number, DoubleNumber
+from models.data_numbers import Number, DoubleNumber
 
 translate_key = [('0', "m"), ('1', "y"), ('2', "w"), ('3', "c"), ('4', "q"), ('5', "a"), ('6', "p"), ('7', "r"), ('8', "e"), ('9', "o")]
 encode_map = str.maketrans({numeric: letter for numeric, letter in translate_key})
@@ -37,7 +37,7 @@ class DataExtractor:
         'Writes a single digit'
         self.data += str(number)
 
-    def write_number(self, number: Number | int, prepend: bool = False) -> None:
+    def write_number(self, number: int, prepend: bool = False) -> None:
         'Writes a single number in the format of (size, actual value)'
         if not isinstance(number, Number):
             number = Number(number)
@@ -46,7 +46,7 @@ class DataExtractor:
         else:
             self.data += number.to_save()
     
-    def write_double_number(self, number: DoubleNumber | int, prepend: bool = False) -> None:
+    def write_double_number(self, number: int, prepend: bool = False) -> None:
         'Writes a single number in the format of (number of size digits, size, actual value)'
         if not isinstance(number, DoubleNumber):
             number = DoubleNumber(number)

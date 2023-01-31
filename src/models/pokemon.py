@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from .extractor import DataExtractor, encode
-from src.database import Record
+from models.extractor import DataExtractor, encode
+from database import Record
 
 @dataclass
 class Pokemon(Record):

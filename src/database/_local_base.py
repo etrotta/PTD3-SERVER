@@ -7,7 +7,7 @@ from typing import Callable, Optional
 
 from deta.base import Util
 
-from .bound_meta import BoundMeta
+from database.bound_meta import BoundMeta
 
 operations = {
     # no prefix = eq

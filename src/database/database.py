@@ -1,19 +1,20 @@
+import os
 import itertools
 from typing import Callable, Optional, Type, Union
 from datetime import datetime
 import inspect
 
-from .exceptions import KeyNotFound
-from .record import (
+from database.exceptions import KeyNotFound
+from database.record import (
     Record,
 
 )
-from .query import Query
+from database.query import Query
 
-from .base_class import LoadableDataclass
+from database.base_class import LoadableDataclass
 
-# from deta import Base
-from ._local_base import Base as LocalBase
+from database._local_base import Base as LocalBase
+from deta import Base
 
 # Instructions for encoding / decoding data not supported by deta base
 EMPTY_LIST_STRING = "$EMPTY_LIST"  # Setting a field to an empty list sets it to `null`
@@ -35,17 +36,16 @@ class Database(dict[str, Record]):
             You may subclass the Record class or use it directly, though direct usage is not recommended
         """
         # TODO IMPLEMENT `MEMORY` / `DETA BASE` SUPPORT
-        # base_mode = os.getenv("DETA_ECLIPSE_ORM_DATABASE_MODE", "DETA_BASE")
-        # if base_mode == "DETA_BASE":
-        #     self.__base = Base(name)
-        # elif base_mode == "MEMORY":
-        #     self.__base = LocalBase(name)
-        # elif base_mode == "DISK":
-        #     self.__base = LocalBase(name, sync_disk=True)
-        # else:
-        #     raise Exception("Invalid value for DETA_ECLIPSE_ORM_DATABASE_MODE environment variable")
-        self.__base = LocalBase(name, sync_disk=True)
-        
+        base_mode = os.getenv("DETA_ECLIPSE_ORM_DATABASE_MODE", "DETA_BASE")
+        if base_mode == "DETA_BASE":
+            self.__base = Base(name)
+        elif base_mode == "MEMORY":
+            self.__base = LocalBase(name, sync_disk=False)
+        elif base_mode == "DISK":
+            self.__base = LocalBase(name, sync_disk=True)
+        else:
+            raise Exception("Invalid value for DETA_ECLIPSE_ORM_DATABASE_MODE environment variable")
+
         self.__record_type = record_type
         self.load_record = record_type.from_dict
 
@@ -169,7 +169,8 @@ class Database(dict[str, Record]):
                 record = self.encode_entry(record)
                 record['key'] = _key
                 records.append(record)
-            self.__base.put_many(records)
+            if records:
+                self.__base.put_many(records)
             _all_records.extend(records)
         return _all_records
     
@@ -181,7 +182,8 @@ class Database(dict[str, Record]):
                 record = self.encode_entry(record)
                 record['key'] = k
                 records.append(record)
-            self.__base.put_many(records)
+            if records:
+                self.__base.put_many(records)
             _all_records.extend(records)
         return _all_records
 

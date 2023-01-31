@@ -1,6 +1,6 @@
-from .database import Database
-from .record import Record
-from .query import Query, Field
+from database.database import Database
+from database.record import Record
+from database.query import Query, Field
 
 __all__ = [
     "Database",

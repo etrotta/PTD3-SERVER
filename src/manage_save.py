@@ -1,15 +1,13 @@
 from urllib.parse import unquote
 
-from .models.networking import Request
+from models.networking import Request
 
-from .models.extras_2 import ExtraInfoLoader, ExtraInfo
-from .models.pokemon import PokeLoader, Pokemon
-from .models.items import ItemsLoader, Item
-from .models.profile import ProfileLoader, Profile
+from models.extras_2 import ExtraInfoLoader, ExtraInfo
+from models.pokemon import PokeLoader, Pokemon
+from models.items import ItemsLoader, Item
+from models.profile import ProfileLoader, Profile
 
-from .models.extractor import encode, decode
-
-from src.database import Database, Query, Field
+from database import Database, Query, Field
 
 
 profile_base = Database("ptd3_profiles_database", record_type=Profile)
@@ -67,6 +65,7 @@ def set_save_data(request: Request) -> dict:
     items.load()
 
     profile_base[profile_key] = profile
+
     extra_base.put_many(extras.infos, key_source='info_id')
     
     poke_base.put_many(pokemons.to_insert + pokemons.to_update, key_source='poke_save_id', iter=True)
@@ -76,6 +75,6 @@ def set_save_data(request: Request) -> dict:
     item_base.put_many(items.items, key_source='item_id')
 
     result = {}
-    for pokemon in pokemons.to_insert:
+    for pokemon in pokemons.to_insert:  # Return the newly created Save IDs
         result[f'PID{pokemon.poke_party_pos}'] = pokemon.poke_save_id
     return result

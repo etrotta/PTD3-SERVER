@@ -1,20 +1,33 @@
 class Request:
-    def __init__(self, method: str, url: str, body: str):
-        if '?' in url:
-            path, query = url.split('?', 1)
-        else:
-            path, query = url, ''
+    def __init__(self, path: str, data: dict[str, str]):
+        self.path = path
+        self.data = data
 
-        self.method = method.removeprefix('/')
-        self.path = path.removeprefix('/')
-        if query:
-            self.query = {k: v for k, v in (x.split('=') for x in query.split('&'))}
-        else:
-            self.query = None
-        self.data = {k: v for k, v in (x.split('=') for x in body.split('&'))}
+    @classmethod
+    def from_http(cls, url: str, body: str) -> 'Request':
+        path = url.split('?', 1)[0]
+        data = {k: v for k, v in (x.split('=') for x in body.split('&'))}
+        return cls(
+            path.removeprefix('/'),
+            data,            
+        )
+
+    @classmethod
+    def from_wsgi(cls, environ: dict[str, str]) -> 'Request':
+        path = environ['path']
+        body = environ['wsgi.input'].read().decode('UTF-8')
+
+        print(environ)
+        print(body)
+
+        data = {k: v for k, v in (x.split('=') for x in body.split('&'))}
+        return cls(
+            path.removeprefix('/'),
+            data,            
+        )
 
     def __repr__(self) -> str:
-        return f"Request({self.path=}, {self.query=}, {self.method=}, {self.data=})"
+        return f"Request({self.path=}, {self.data=})"
 
 class Response:
     def __init__(self, **kwargs):
@@ -23,5 +36,13 @@ class Response:
     def __repr__(self) -> str:
         return f"Response({self.data=})"
 
-    def encode(self):
+    def encode_http(self) -> bytes:
         return self.data.encode("utf-8")
+    
+    def encode_wsgi(self) -> dict:
+        'Returns a {code: ..., headers: ..., output: ...} dict'
+        return {
+            'code': '200 OK',
+            'headers': [],
+            'output': self.data.encode("utf-8"),
+        }

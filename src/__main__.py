@@ -1,9 +1,7 @@
-from urllib.parse import unquote
 import dotenv
 dotenv.load_dotenv()
 
 from http.server import HTTPServer, BaseHTTPRequestHandler
-import pathlib
 
 from .request_handler import (
     Request,
@@ -13,35 +11,26 @@ from .request_handler import (
 
 
 class PTDHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        print(self.command, self.path)
-        print(self.headers)
-
+    def do_GET(self):  # Not really used
+        # print(self.command, self.path)
+        # print(self.headers)
         self.send_response(200, 'OK')
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
-        # self.wfile.write('{"test": "something"}'.encode("utf-8"))
-        if (size := self.headers.get("Content-Size")) is not None:
-            print(self.rfile.read(size))
+        # if (size := self.headers.get("Content-Size")) is not None:
+        #     print(self.rfile.read(size))
 
     def do_POST(self):
-        print(self.command, self.path)
-        print(self.headers)
-
-        # self.send_response(200, 'OK')
-        # self.send_header('Content-Type', 'application/json')
-        # self.end_headers()
-        # self.wfile.write('{"test": "something"}'.encode("utf-8"))
-        # self.rfile.read(self.headers.get("Content-Size"))
-
-        path = pathlib.Path('data' + self.path.split('?')[0])
-        path.parent.mkdir(exist_ok=True, parents=True)
+        # print(self.command, self.path)
+        # print(self.headers)
+        # path = pathlib.Path('data' + self.path.split('?')[0])
+        # path.parent.mkdir(exist_ok=True, parents=True)
         body = self.rfile.read(int(self.headers.get("Content-Length", 0))).decode('UTF-8')
-        with path.open('a') as file:
-            file.write('\n')
-            for thing in body.split("&"):
-                file.write(unquote(thing) + '\n')
-            file.write('\n')
+        # with path.open('a') as file:
+        #     file.write('\n')
+        #     for thing in body.split("&"):
+        #         file.write(unquote(thing) + '\n')
+        #     file.write('\n')
 
         try:
             response: Response = handle_request(Request(self.command, self.path, body))
@@ -50,7 +39,7 @@ class PTDHandler(BaseHTTPRequestHandler):
             self.end_headers()
             raise
         else:
-            print(response)
+            # print(response)
             self.send_response(200, 'OK')
             self.end_headers()
             self.wfile.write(response.encode())

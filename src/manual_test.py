@@ -1,8 +1,9 @@
+from urllib.parse import quote, unquote
 from io import BytesIO
 
 from main import app
 
-path = '/save'
+path = '/public'
 test_bodies = [
     # (
     #     'Action=createAccount',
@@ -24,12 +25,25 @@ test_bodies = [
     # (
     #     'Action=loadStory',
     # ),
-    # (
-    #     'Action=loadStoryProfile',
-    #     'whichProfile=2',
-    # ),
+    (
+        'Action=loadStoryProfile',
+        'whichProfile=1',
+    ),
 ]
-test_bodies = ['&'.join((*body, 'Email=test', 'Pass=xyz')).encode('UTF-8') for body in test_bodies]
+
+test_bodies = [
+    '&'.join(
+        (
+            *body,
+            # 'Public' server. The Pass is just to interact with the server, not with deta itself, 
+            # and I do not mind people having access to that game account.
+            f'Email={quote(f"https://ptd3server-3-o2189185.deta.app{path}")}',
+            'Pass=JgpTobfD5y3SCrjLEW1sGGhSFvX8gAod',
+            )
+        )
+    .encode('UTF-8')
+    for body in test_bodies
+]
 
 def get_environ(path: str, body: bytes) -> dict:
     environ = {

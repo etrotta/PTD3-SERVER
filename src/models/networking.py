@@ -15,7 +15,7 @@ class Request:
     @classmethod
     def from_wsgi(cls, environ: dict[str, str]) -> 'Request':
         path = environ['path']
-        body = environ['wsgi.input'].read().decode('UTF-8')
+        body = environ['body']
 
         print(environ)
         print(body)

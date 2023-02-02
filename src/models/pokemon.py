@@ -125,6 +125,7 @@ class PokeLoader(DataExtractor):
     @classmethod
     def encode_story_pokemons(cls, pokemons: list[Pokemon], url_parameters: dict) -> str:
         "Encode the pokemons for `loadStoryProfile`"
+        pokemons.sort(key=lambda poke: poke.poke_party_pos, reverse=True)
         self = cls('', pokemons)
         self.write_number(len(pokemons))
         for i, pokemon in enumerate(pokemons, 1):

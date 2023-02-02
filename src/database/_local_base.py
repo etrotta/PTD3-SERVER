@@ -73,7 +73,12 @@ class Base:
             obj = json.loads(obj)
         return obj
 
-    def insert(self, data, key):
+    def insert(self, data, key, *, expire_in: None=None, expire_at: None=None):
+        if expire_in:
+            print(f"Ignoring parameter (not supported by local base): {expire_in=}")
+        if expire_at:
+            print(f"Ignoring parameter (not supported by local base): {expire_at=}")
+
         if key in self.inventory:
             raise Exception(f"Item with key '{key}' already exists")
         self.inventory[key] = json.dumps(data)
@@ -107,7 +112,11 @@ class Base:
         items = {record.pop('key'): json.dumps(record) for record in (item.copy() for item in items)}
         self.inventory.update(items)
 
-    def put(self, item, key):
+    def put(self, item, key, *, expire_in: None=None, expire_at: None=None):
+        if expire_in:
+            print(f"Ignoring parameter (not supported by local base): {expire_in=}")
+        if expire_at:
+            print(f"Ignoring parameter (not supported by local base): {expire_at=}")
         self.inventory[key] = json.dumps(item)
 
     def fetch(self, query, limit, last):

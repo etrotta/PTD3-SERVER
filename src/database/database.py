@@ -59,9 +59,7 @@ class Database(dict[str, Record]):
         return result
 
     def __setitem__(self, key: str, record: Record) -> None:
-        if not isinstance(record, Record):
-            raise TypeError("You can only set database values to Record subclasses.")
-        self.put(key, record.to_dict())
+        self.put(key, record)
     
     def __delitem__(self, key: str) -> None:
         self.delete(key)
@@ -76,7 +74,7 @@ class Database(dict[str, Record]):
                 record[key] = EMPTY_DICTIONARY_STRING
             elif isinstance(value, (list, tuple)) and list(value) == []:  # Empty lists becomes `null` on deta base on update
                 record[key] = EMPTY_LIST_STRING
-            elif inspect.isfunction(value):  # Converts functions to references based on their source file and name
+            elif inspect.isfunction(value):  # TODO register functions via a decorator and save/load them
                 if value in self.__known_functions:
                     record[key] = {
                         "__database_load_method": "function",
@@ -105,7 +103,7 @@ class Database(dict[str, Record]):
     def _load_encoded(self, record: dict) -> Union[LoadableDataclass, Callable]:
         "Tries to load back an encoded record field into a user defined class or function. May raise exceptions."
         method = record['__database_load_method']
-        if method == "function":
+        if method == "function":  # TODO register functions via a decorator and save/load them
             name = record['__name']
             return self.__known_functions[name]
         elif method == "LoadableDataclass.from_dict":
@@ -144,14 +142,18 @@ class Database(dict[str, Record]):
             return None
         return self.load_record(self.decode_entry(data))
 
-    def insert(self, key: str, data: dict) -> Record:
+    def insert(self, key: str, data: Union[Record, dict], *, expire_in: Optional[int] = None, expire_at: Optional[datetime] = None) -> Record:
         "Insert a record and return it."
-        self.__base.insert(self.encode_entry(data), str(key))
+        if isinstance(data, Record):
+            data = data.to_dict()
+        self.__base.insert(self.encode_entry(data), str(key), expire_in=expire_in, expire_at=expire_at)
         return self.load_record(data)
     
-    def put(self, key: str, data: dict) -> Record:
+    def put(self, key: str, data: Union[Record, dict], *, expire_in: Optional[int] = None, expire_at: Optional[datetime] = None) -> Record:
         "Insert or update a record and return it."
-        self.__base.put(self.encode_entry(data), str(key))
+        if isinstance(data, Record):
+            data = data.to_dict()
+        self.__base.put(self.encode_entry(data), str(key), expire_in=expire_in, expire_at=expire_at)
         return self.load_record(data)
     
     def delete(self, key: str) -> None:

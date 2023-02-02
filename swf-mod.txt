@@ -12,12 +12,13 @@ poke.MG_URL = "http://127.0.0.1:1234/mystery_gift";  (just returns an empty resp
 
 note: there are some more URLs in code.sndgames.ptd3.screens, such as screen_Main. No need to touch them.
 
-on almost every single request (screen_Main, popup_Story_Load, ...)
+on almost every single request (screen_Main, popup_Story_Load, popup_Story_Profile_Load, popup_Story_Save, popup_Story_Delete)
 ```
 import flash.net.URLRequestHeader
 
 _loc4_.url = email + "?Date=" + _loc2_.getTime();
 
-var _loc5_:URLRequestHeader = new URLRequestHeader("X-Space-App-Key",password);
-_loc4_.requestHeaders.push(_loc5_);
+_loc4_.requestHeaders.push(new URLRequestHeader("X-Space-App-Key",password));
 ```
+
+on binarydata -> textx -> DefineEditText 23 and 24 (more specifically on password), set max length to 100s 

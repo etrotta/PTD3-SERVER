@@ -17,16 +17,30 @@ class App:
         (WSGI)
         """
         data["path"] = data.get("PATH_INFO") or '/'
+        data["body"] = data['wsgi.input'].read().decode('UTF-8')
 
         if data['path'] == '/mystery_gift':  # TODO IMPLEMENT MYSTERY GIFT?
             start_response('200 OK', [])
             return []
 
-        assert data['path'] == '/save'
 
-        response: Response = handle_request(Request.from_wsgi(data))
+        try:
+            response: Response = handle_request(Request.from_wsgi(data))
 
-        result = response.encode_wsgi()
+            result = response.encode_wsgi()
+        except Exception as err:
+            result = {
+                'code': '500 UH OH',
+                'headers': [],
+                'output': (
+                    f"Error {err}\n"
+                    f"Environ: {data}\n"
+                ).encode("UTF-8")
+            }
+            import sys
+            import json
+            sys.stdout.write(str(err) + str(data))
+            sys.stderr.write(str(err) + str(data))
         start_response(result['code'], result['headers'])
         return [result['output']]
 

@@ -1,27 +1,18 @@
 class Request:
-    def __init__(self, method: str, url: str, body: str):
-        if '?' in url:
-            path, query = url.split('?', 1)
-        else:
-            path, query = url, ''
-
-        self.method = method.removeprefix('/')
-        self.path = path.removeprefix('/')
-        if query:
-            self.query = {k: v for k, v in (x.split('=') for x in query.split('&'))}
-        else:
-            self.query = None
-        self.data = {k: v for k, v in (x.split('=') for x in body.split('&'))}
+    def __init__(self, body: str):
+        data: dict[str, str] = {k: v for k, v in (x.split('=', 1) for x in body.split('&'))}
+        self.data = data
 
     def __repr__(self) -> str:
-        return f"Request({self.path=}, {self.query=}, {self.method=}, {self.data=})"
+        return f"Request({self.data=})"
 
 class Response:
     def __init__(self, **kwargs):
-        self.data = '&'.join(f'{k}={v}' for k, v in kwargs.items())
+        self.data = kwargs
+        self.body = '&'.join(f'{k}={v}' for k, v in kwargs.items())
 
     def __repr__(self) -> str:
-        return f"Response({self.data=})"
+        return f"Response({self.data=}, {self.body=})"
 
-    def encode(self):
-        return self.data.encode("utf-8")
+    def encode(self) -> bytes:
+        return self.body.encode("utf-8")

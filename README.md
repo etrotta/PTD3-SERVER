@@ -3,8 +3,30 @@
 This project aims to make the flash game Pokémon Tower Defense 3 playable again, by recreating the server and responding to the client's requests the same way the original would have.
 It requires a slightly modified SWF client in order to use this server over the default (now dead/offline) one.
 
-# Installing
-You can `git clone`, `pip install -r requirements.txt`, run as `python -m src`, then edit the SWF according to swf-mod.txt, or check back later once there is a more user-friendly, less error-prone way to do play it.
+# How to Play
+I recommend installing a personal server on (Deta Space)[https://deta.space/discovery/@etrotta/ptd3server].
+After installing it, open the server's app for more instructions.
+Alternatively,
+- You can use someone else's server to test it out, but keep in mind that your account could easily be griefed when doing so, 
+    and it is not trivial to transfer your account to another server.
+- If you are not afraid to touch the code on your own, you can clone this repository and run it locally
+To run locally, clone the repository and run as `python src/local.py`, and in-game point the URL to `http://localhost:1234`. When doing so, you may also need to set environment variables (`pip install python-dotenv` and create a `local.env` file according to `.env.example`, or modify env variables through whichever method you want)
+
+Whichever method you use to get a server, you'll need of a PTD3 SWF modified so that it can point to the right server, as well as a functional flash player.
+If you want to modify the game client yourself, see the mod_instructions.txt for instructions
+
+# Links
+Server on Deta Space: https://deta.space/discovery/@etrotta/ptd3server
+Modified Game SWF: https://drive.google.com/file/d/1PlQRLNhsJxvJ_zu1CYGygHlw3vtzVRS2/view?usp=sharing
+Flash Player (Newgrounds): https://www.newgrounds.com/flash/player
+Flash Player (Adobe, debugger): https://web.archive.org/web/20220401020702/https://www.adobe.com/support/flashplayer/debug_downloads.html
 
 # Contributing
 Create a GitHub Issue or contact me on Discord first.
+
+# Acknowledgements
+This project wouldn't have been possible with the original game by [Samuel Otero](https://samdangames.blogspot.com/) and the [JPEXS Free Flash Decompiler](https://github.com/jindrapetrik/jpexs-decompiler).
+
+Icon made with Stable Diffusion 2.1 on https://playgroundai.com/.
+
+Shout-out to the [PTD Archives discord server](https://discord.gg/vMgTRW46cs).

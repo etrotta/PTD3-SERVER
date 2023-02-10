@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import functools
 import json
 import pathlib
@@ -7,7 +5,7 @@ from typing import Callable, Optional
 
 from deta.base import Util
 
-from .bound_meta import BoundMeta
+from src.database.bound_meta import BoundMeta
 
 operations = {
     # no prefix = eq
@@ -73,7 +71,12 @@ class Base:
             obj = json.loads(obj)
         return obj
 
-    def insert(self, data, key):
+    def insert(self, data, key, *, expire_in: None=None, expire_at: None=None):
+        if expire_in:
+            print(f"Ignoring parameter (not supported by local base): {expire_in=}")
+        if expire_at:
+            print(f"Ignoring parameter (not supported by local base): {expire_at=}")
+
         if key in self.inventory:
             raise Exception(f"Item with key '{key}' already exists")
         self.inventory[key] = json.dumps(data)
@@ -107,7 +110,11 @@ class Base:
         items = {record.pop('key'): json.dumps(record) for record in (item.copy() for item in items)}
         self.inventory.update(items)
 
-    def put(self, item, key):
+    def put(self, item, key, *, expire_in: None=None, expire_at: None=None):
+        if expire_in:
+            print(f"Ignoring parameter (not supported by local base): {expire_in=}")
+        if expire_at:
+            print(f"Ignoring parameter (not supported by local base): {expire_at=}")
         self.inventory[key] = json.dumps(item)
 
     def fetch(self, query, limit, last):
@@ -140,12 +147,12 @@ class DiskBaseBackend(dict, metaclass=BoundMeta, bind_methods=bind_methods):
     """Database backend that saves to disk whenever it's modified."""
     def __init__(self, database_name: str):
         try:
-            with (pathlib.Path(os.getenv("DETA_ECLIPSE_ORM_FOLDER")) / database_name).open('r') as file:
+            with (pathlib.Path(os.getenv("DETA_ORM_FOLDER")) / database_name).open('r') as file:
                 super().__init__(json.load(file))
         except Exception:
             super().__init__()
         self._file_name = database_name
-        if os.getenv("DETA_ECLIPSE_ORM_FORMAT_NICELY", False):
+        if os.getenv("DETA_ORM_FORMAT_NICELY", False):
             self._options = {
                 "indent": 4,
                 "sort_keys": True,
@@ -158,6 +165,6 @@ class DiskBaseBackend(dict, metaclass=BoundMeta, bind_methods=bind_methods):
 
 
     def _sync(self, method, value, *args, **kwargs):
-        with (pathlib.Path(os.getenv("DETA_ECLIPSE_ORM_FOLDER")) / self._file_name).open('w') as file:
+        with (pathlib.Path(os.getenv("DETA_ORM_FOLDER")) / self._file_name).open('w') as file:
             json.dump(dict(self), file, **self._options)
         return value

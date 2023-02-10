@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from src.database.record import Record
-from .extractor import DataExtractor, decode, encode
+from src.models.extractor import DataExtractor, decode, encode
 
 @dataclass
 class Profile(Record):

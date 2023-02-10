@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from .extractor import DataExtractor, encode
+from src.models.extractor import DataExtractor, encode
 from src.database import Record
 
 @dataclass

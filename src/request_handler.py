@@ -1,8 +1,13 @@
 import random
 
-from .models.networking import Request, Response
-from .models.extractor import encode
-from .manage_save import get_profiles_list, get_story_profile, set_save_data
+from src.models.networking import Request, Response
+from src.models.extractor import encode
+from src.manage_save import (
+    get_profiles_list,
+    get_story_profile,
+    set_save_data,
+    delete_save_data,
+)
 
 CS = encode("12345")
 
@@ -33,7 +38,7 @@ def handle_request(request: Request):
         data = set_save_data(request)
         return Response(Result='Success', CS=CS, **data)
     elif "deleteStory":  # From: scren.popup_Story_Delete
-        raise NotImplementedError('oops')
-        return Response(Result='', Reason='')
+        delete_save_data(request)
+        return Response(Result='Success')
     else:
         raise Exception(f"Unexpected action: {request.data.get('Action')}", request)

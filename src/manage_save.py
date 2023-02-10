@@ -1,14 +1,14 @@
 from uuid import uuid4
 from urllib.parse import unquote
 
-from models.networking import Request
+from src.models.networking import Request
 
-from models.extras_2 import ExtraInfoLoader, ExtraInfo
-from models.pokemon import PokeLoader, Pokemon
-from models.items import ItemsLoader, Item
-from models.profile import ProfileLoader, Profile
+from src.models.extras_2 import ExtraInfoLoader, ExtraInfo
+from src.models.pokemon import PokeLoader, Pokemon
+from src.models.items import ItemsLoader, Item
+from src.models.profile import ProfileLoader, Profile
 
-from database import Database, Query, Field
+from src.database import Database, Query, Field
 
 
 profile_base = Database("ptd3_profiles_database", record_type=Profile)
@@ -20,20 +20,24 @@ item_base = Database("ptd3_item_database", record_type=Item)
 
 def get_profiles_list(request: Request) -> dict:
     result = {}
-    username = unquote(request.data['Email']).rsplit('/', 1)[-1]
+    username = request.data.get("Account")
+    if username is None:
+        username = unquote(request.data['Email']).rsplit('/', 1)[-1]
     profiles: list[Profile] = profile_base.fetch(Query(Field("key").startswith(username)))
     data = ProfileLoader.encode_profiles(profiles, result)
     result['extra'] = data
     return result
 
 def get_story_profile(request: Request) -> dict:
-    username = unquote(request.data['Email']).rsplit('/', 1)[-1]
+    username = request.data.get("Account")
+    if username is None:
+        username = unquote(request.data['Email']).rsplit('/', 1)[-1]
     profile_key = f"{username}${request.data['whichProfile']}"
 
     profile = profile_base.get(profile_key)
-    extras = extra_base.fetch(Query(Field("key").startswith(profile_key)))
+    extras = extra_base.fetch(Query(Field("key").startswith(profile_key)), follow_last=True)
     pokemons = poke_base.fetch(Query(Field("key").startswith(profile_key)), follow_last=True)
-    items = item_base.fetch(Query(Field("key").startswith(profile_key)))
+    items = item_base.fetch(Query(Field("key").startswith(profile_key)), follow_last=True)
     result = dict()
     result['extra'] = ProfileLoader.encode_story_profile(profile, result)
     result['extra2'] = ExtraInfoLoader.encode_story_extras(extras, result)
@@ -49,7 +53,9 @@ def set_save_data(request: Request) -> dict:
         outer_key: part
         for outer_key, part in (x.split('=') for x in unquote(request.data["extra"]).split('&'))
     }
-    username = unquote(request.data['Email']).rsplit('/', 1)[-1]
+    username = request.data.get("Account")
+    if username is None:
+        username = unquote(request.data['Email']).rsplit('/', 1)[-1]
     profile_key = f"{username}${request.data['whichProfile']}"
 
     profile = profile_base.get(profile_key)
@@ -99,7 +105,9 @@ def set_save_data(request: Request) -> dict:
 
 def delete_save_data(request: Request) -> dict:
     "Deletes the profile related save data"
-    username = unquote(request.data['Email']).rsplit('/', 1)[-1]
+    username = request.data.get("Account")
+    if username is None:
+        username = unquote(request.data['Email']).rsplit('/', 1)[-1]
     profile_key = f"{username}${request.data['whichProfile']}"
 
     saved_pokemons = poke_base.fetch(Query(Field("key").startswith(profile_key)), follow_last=True)

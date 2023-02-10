@@ -1,8 +1,8 @@
 import random
 
-from models.networking import Request, Response
-from models.extractor import encode
-from manage_save import (
+from src.models.networking import Request, Response
+from src.models.extractor import encode
+from src.manage_save import (
     get_profiles_list,
     get_story_profile,
     set_save_data,

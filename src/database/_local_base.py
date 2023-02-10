@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import functools
 import json
 import pathlib
@@ -7,7 +5,7 @@ from typing import Callable, Optional
 
 from deta.base import Util
 
-from database.bound_meta import BoundMeta
+from src.database.bound_meta import BoundMeta
 
 operations = {
     # no prefix = eq
@@ -149,12 +147,12 @@ class DiskBaseBackend(dict, metaclass=BoundMeta, bind_methods=bind_methods):
     """Database backend that saves to disk whenever it's modified."""
     def __init__(self, database_name: str):
         try:
-            with (pathlib.Path(os.getenv("DETA_ECLIPSE_ORM_FOLDER")) / database_name).open('r') as file:
+            with (pathlib.Path(os.getenv("DETA_ORM_FOLDER")) / database_name).open('r') as file:
                 super().__init__(json.load(file))
         except Exception:
             super().__init__()
         self._file_name = database_name
-        if os.getenv("DETA_ECLIPSE_ORM_FORMAT_NICELY", False):
+        if os.getenv("DETA_ORM_FORMAT_NICELY", False):
             self._options = {
                 "indent": 4,
                 "sort_keys": True,
@@ -167,6 +165,6 @@ class DiskBaseBackend(dict, metaclass=BoundMeta, bind_methods=bind_methods):
 
 
     def _sync(self, method, value, *args, **kwargs):
-        with (pathlib.Path(os.getenv("DETA_ECLIPSE_ORM_FOLDER")) / self._file_name).open('w') as file:
+        with (pathlib.Path(os.getenv("DETA_ORM_FOLDER")) / self._file_name).open('w') as file:
             json.dump(dict(self), file, **self._options)
         return value

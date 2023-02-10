@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 
-from models.extractor import DataExtractor, encode
-from database import Record
+from src.models.extractor import DataExtractor, encode
+from src.database import Record
 
 @dataclass
 class ExtraInfo(Record):

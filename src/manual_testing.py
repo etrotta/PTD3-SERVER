@@ -1,7 +1,7 @@
 from urllib.parse import quote, unquote
 from io import BytesIO
 
-from main import app
+from src.main import app
 
 path = '/public'
 test_bodies = [

@@ -1,4 +1,4 @@
-from models.data_numbers import Number, DoubleNumber
+from src.models.data_numbers import Number, DoubleNumber
 
 translate_key = [('0', "m"), ('1', "y"), ('2', "w"), ('3', "c"), ('4', "q"), ('5', "a"), ('6', "p"), ('7', "r"), ('8', "e"), ('9', "o")]
 encode_map = str.maketrans({numeric: letter for numeric, letter in translate_key})

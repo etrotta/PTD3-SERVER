@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from typing import Optional
 
-from database.record import Record
-from models.extractor import DataExtractor, decode, encode
+from src.database.record import Record
+from src.models.extractor import DataExtractor, decode, encode
 
 @dataclass
 class Profile(Record):

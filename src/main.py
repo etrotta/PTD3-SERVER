@@ -1,14 +1,17 @@
-try:
-    import dotenv
-    dotenv.load_dotenv('local.env')
-except ImportError:
-    pass
+from pathlib import Path
 
-from request_handler import (
+from src.request_handler import (
     Request,
     Response,
     handle_request,
 )
+
+_static_files = (
+    'index.html',
+    'style.css',
+    'mod_instructions.txt',
+)
+path = Path(__file__).parent
 
 class App:
     def __call__(self, data, start_response):
@@ -16,32 +19,38 @@ class App:
         Handles incoming interaction data
         (WSGI)
         """
-        data["path"] = data.get("PATH_INFO") or '/'
+        data["path"] = data.get("PATH_INFO").removeprefix('/') or 'index.html'
         data["body"] = data['wsgi.input'].read().decode('UTF-8')
 
-        if data['path'] == '/mystery_gift':  # TODO IMPLEMENT MYSTERY GIFT?
-            start_response('200 OK', [])
-            return []
-
-
         try:
-            response: Response = handle_request(Request.from_wsgi(data))
+            # Save/Load/Delete/List saves, meant to speak with the game client
+            if data['path'].startswith('ptd3save'):  # Manage (PTD3 Story) Save
+                    response: Response = handle_request(Request(data['body']))
+                    result = response.encode()
+                    start_response('200 OK', [])
+                    return [result]
+            # Documentation
+            elif data['path'] in _static_files:
+                with open(path / data['path'], 'rb') as file:
+                    start_response('200 OK', [])
+                    return [file.read()]
+            # TODO IMPLEMENT MYSTERY GIFT?
+            elif data['path'] == 'mystery_gift':  
+                start_response('200 OK', [])
+                return []
+            # 404 Not Found
+            else:
+                start_response('404 NOT FOUND', [])
+                return ['Page not found'.encode('UTF-8')]
 
-            result = response.encode_wsgi()
         except Exception as err:
-            result = {
-                'code': '500 UH OH',
-                'headers': [],
-                'output': (
-                    f"Error {err}\n"
-                    f"Environ: {data}\n"
-                ).encode("UTF-8")
-            }
+            raise
             import sys
-            import json
-            sys.stdout.write(str(err) + str(data))
-            sys.stderr.write(str(err) + str(data))
-        start_response(result['code'], result['headers'])
-        return [result['output']]
+            error_message = f"Error {err}   Environ {data}"
+            sys.stdout.write(error_message)
+            sys.stderr.write(error_message)
+            start_response('500 INTERNAL SERVER ERROR', [])
+            return [error_message.encode('UTF-8')]
+
 
 app = App()

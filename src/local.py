@@ -1,48 +1,42 @@
-import dotenv
-dotenv.load_dotenv('local.env')
+"HTTP to WSGI adapter for running locally (not recommended for use when hosting online!)"
+try:
+    import dotenv
+    dotenv.load_dotenv('local.env')
+except ImportError:
+    print("Failed to import dotenv ; will not load `local.env` even if it is present")
 
+from io import BytesIO
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-from request_handler import (
-    Request,
-    Response,
-    handle_request,
-)
+from src.main import app
 
 
 class PTDHandler(BaseHTTPRequestHandler):
-    def do_GET(self):  # Not really used
-        # print(self.command, self.path)
-        # print(self.headers)
-        self.send_response(200, 'OK')
-        self.send_header('Content-Type', 'application/json')
+    def send_request_to_app(self):
+        body = self.rfile.read(int(self.headers.get("Content-Length", 0)))
+        environ = {
+            "CONTENT_LENGTH": str(len(body)),
+            "PATH_INFO": self.path,
+            "REMOTE_ADDR": "127.0.0.1",
+            "wsgi.input": BytesIO(body),
+        }
+        print(environ)
+        def _start_response(code: str, headers: list[tuple[str, str]]):
+            code_number, code_reason = code.split(' ', 1)
+            code_number = int(code_number)
+            self.send_response(code_number, code_reason)
+            for header in headers:
+                self.send_header(*header)
+        output = app(environ, _start_response)
         self.end_headers()
-        # if (size := self.headers.get("Content-Size")) is not None:
-        #     print(self.rfile.read(size))
+        for out in output:
+            self.wfile.write(out)
+
+    def do_GET(self):
+        return self.send_request_to_app()
 
     def do_POST(self):
-        # print(self.command, self.path)
-        # print(self.headers)
-        # path = pathlib.Path('data' + self.path.split('?')[0])
-        # path.parent.mkdir(exist_ok=True, parents=True)
-        body = self.rfile.read(int(self.headers.get("Content-Length", 0))).decode('UTF-8')
-        # with path.open('a') as file:
-        #     file.write('\n')
-        #     for thing in body.split("&"):
-        #         file.write(unquote(thing) + '\n')
-        #     file.write('\n')
-
-        try:
-            response: Response = handle_request(Request.from_http(self.path, body))
-        except Exception:
-            self.send_response(500, 'INTERNAL SERVER ERROR')
-            self.end_headers()
-            raise
-        else:
-            # print(response)
-            self.send_response(200, 'OK')
-            self.end_headers()
-            self.wfile.write(response.encode_http())
+        return self.send_request_to_app()
 
 
 def run(server_class=HTTPServer, handler_class=PTDHandler):
@@ -51,4 +45,5 @@ def run(server_class=HTTPServer, handler_class=PTDHandler):
     server.serve_forever()
 
 if __name__ == '__main__':
+    print("Running PTD3 Server locally on port 1234")
     run()

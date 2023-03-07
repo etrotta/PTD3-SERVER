@@ -1,12 +1,13 @@
 import io
 import random
+import sys
 from urllib.parse import quote
 
-from src.local import app
+from src.main import app
 
 path = '/ptd3save/username'
 
-test_bodies = [
+bodies = [
     (
         'Action=createAccount',
     ),
@@ -33,7 +34,7 @@ test_bodies = [
     ),
 ]
 
-test_bodies = [
+bodies = [
     '&'.join(
         (
             *body,
@@ -44,7 +45,7 @@ test_bodies = [
             )
         )
     .encode('UTF-8')
-    for body in test_bodies
+    for body in bodies
 ]
 
 expected_responses = [
@@ -67,10 +68,21 @@ expected_responses = [
 
 def get_environ(path: str, body: bytes) -> dict:
     environ = {
+        "wsgi.input": io.BytesIO(body),
+        "wsgi.errors": sys.stderr,
+        'wsgi.version': (1, 0),
+        'wsgi.url_scheme': 'http',
+        'wsgi.multithread': False,
+        'wsgi.multiprocess': False,
+        'wsgi.run_once': True,
+        
         "CONTENT_LENGTH": str(len(body)),
+        "CONTENT_TYPE": "application/x-www-form-urlencoded",
         "PATH_INFO": path,
         "REMOTE_ADDR": "127.0.0.1",
-        "wsgi.input": io.BytesIO(body),
+        "REQUEST_METHOD": "POST",
+        "SERVER_NAME": "localhost",
+        "SERVER_PORT": "5000",
     }
     return environ
 
@@ -78,11 +90,9 @@ def get_environ(path: str, body: bytes) -> dict:
 def test_wsgi():
     def start_response(status, headers):
         assert status == '200 OK'
-        assert headers == []
 
-    for body, expected_response in zip(test_bodies, expected_responses):
+    for body, expected_response in zip(bodies, expected_responses):
         random.seed(42)  # To make sure the UID will come back the same
-        response = app(get_environ(path, body), start_response)
-        assert len(response) == 1
-
-        assert response[0] == expected_response
+        e = get_environ(path, body)
+        response = iter(app(e, start_response))
+        assert next(response) == expected_response

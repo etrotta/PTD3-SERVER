@@ -25,22 +25,22 @@ def create_check_sum(data: str) -> int:
 
 
 def handle_request(data: ImmutableMultiDict[str, str]):
-    # print(request)
-    match data.get('Action'):
-        case 'createAccount':  # From: screen.screen_Main @ Register
-            return Response(Result='Success', UID=get_uid(), Reason='loadedAccount')
-        case 'loadAccount':  # From: screen.screen_Main @ Login
-            return Response(Result='Success', UID=get_uid(), Reason='loadedAccount')
-        case 'loadStory':  # From: screen.popup_StoryLoad
-            return Response(Result='Success', **get_profiles_list(data))
-        case 'loadStoryProfile':  # From: screen.popup_Story_Profile_Load
-            data = get_story_profile(data)
-            _check_sum = encode(str(create_check_sum(data['extra3'] + CS)))
-            return Response(Result='Success', **data, CS=CS, extra5=_check_sum)
-        case 'saveStory':  # From: scren.popup_Story_Save
-            return Response(Result='Success', CS=CS, **set_save_data(data))
-        case 'deleteStory':  # From: scren.popup_Story_Delete
-            delete_save_data(request)
-            return Response(Result='Success')
-        case _:
-            raise Exception(f"Unexpected action: {data.get('Action')}", data)
+    action = data.get('Action')
+    # match/case would look better, but for now Python 3.9 support is a requirement
+    if action == 'createAccount':  # From: screen.screen_Main @ Register
+        return Response(Result='Success', UID=get_uid(), Reason='loadedAccount')
+    elif action == 'loadAccount':  # From: screen.screen_Main @ Login
+        return Response(Result='Success', UID=get_uid(), Reason='loadedAccount')
+    elif action == 'loadStory':  # From: screen.popup_StoryLoad
+        return Response(Result='Success', **get_profiles_list(data))
+    elif action == 'loadStoryProfile':  # From: screen.popup_Story_Profile_Load
+        profile_data = get_story_profile(data)
+        _check_sum = encode(str(create_check_sum(profile_data['extra3'] + CS)))
+        return Response(Result='Success', **profile_data, CS=CS, extra5=_check_sum)
+    elif action == 'saveStory':  # From: scren.popup_Story_Save
+        return Response(Result='Success', CS=CS, **set_save_data(data))
+    elif action == 'deleteStory':  # From: scren.popup_Story_Delete
+        delete_save_data(data)
+        return Response(Result='Success')
+    else:
+        raise Exception(f"Unexpected action: {data.get('Action')}", data)

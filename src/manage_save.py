@@ -22,10 +22,8 @@ item_base = Database("ptd3_item_database", record_type=Item)
 def get_profiles_list(data: ImmutableMultiDict[str, str]) -> dict:
     result = {}
     username = data.get("Account")
-    print(username)
     if username is None:
         username = unquote(data['Email']).rsplit('/', 1)[-1]
-    print(username)
 
     profiles: list[Profile] = profile_base.fetch(Query(Field("key").startswith(username)))
     data = ProfileLoader.encode_profiles(profiles, result)
@@ -35,10 +33,8 @@ def get_profiles_list(data: ImmutableMultiDict[str, str]) -> dict:
 
 def get_story_profile(data: ImmutableMultiDict[str, str]) -> dict:
     username = data.get("Account")
-    print(username)
     if username is None:
         username = unquote(data['Email']).rsplit('/', 1)[-1]
-    print(username)
     profile_key = f"{username}${data['whichProfile']}"
 
     profile = profile_base.get(profile_key)
@@ -61,10 +57,8 @@ def set_save_data(data: ImmutableMultiDict[str, str]) -> dict:
         for outer_key, part in (x.split('=') for x in unquote(data["extra"]).split('&'))
     }
     username = data.get("Account")
-    print(username)
     if username is None:
         username = unquote(data['Email']).rsplit('/', 1)[-1]
-    print(username)
     profile_key = f"{username}${data['whichProfile']}"
 
     profile = profile_base.get(profile_key)

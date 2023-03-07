@@ -1,10 +1,7 @@
-"""HTTP to WSGI adapter for running locally (not recommended for use when hosting online!)"""
-from werkzeug.datastructures import ImmutableMultiDict
-
 try:
     import dotenv
 
-    dotenv.load_dotenv('local.env')
+    dotenv.load_dotenv(__file__ + '/../local.env')
 except ImportError:
     print("Failed to import dotenv ; will not load `local.env` even if it is present")
 
@@ -12,7 +9,7 @@ from flask import Flask, render_template, request
 from src.request_handler import handle_request
 
 app = Flask(__name__, '/')
-print("Running PTD3 Server locally")
+print("Running PTD3 Server")
 
 
 @app.route('/')
@@ -26,7 +23,7 @@ def index():
 @app.route('/php/ptd3_save_1.php', methods=['GET', 'POST'])
 # For etrotta SWF
 @app.route('/ptd3save/<username>', methods=['GET', 'POST'])
-def ptd_save(username):
+def ptd_save(username=None):
     # Save/Load/Delete/List saves, meant to speak with the game client
     return handle_request(request.form).encode()
 

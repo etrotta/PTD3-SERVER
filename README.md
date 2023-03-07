@@ -9,8 +9,12 @@ After installing it, open the server's app for more instructions.
 Alternatively,
 - You can use someone else's server to test it out, but keep in mind that your account could easily be griefed when doing so, 
     and it is not trivial to transfer your account to another server.
-- If you are not afraid to touch the code on your own, you can clone this repository and run it locally
-To run locally, clone the repository and run as `python src/local.py`, and in-game point the URL to `http://localhost:1234`. When doing so, you may also need to set environment variables (`pip install python-dotenv` and create a `local.env` file according to `.env.example`, or modify env variables through whichever method you want)
+- If you are not afraid to touch the code on your own, you can clone this repository and run it locally by:
+  - Cloning the repository via `git clone https://github.com/etrotta/PTD3-SERVER`
+  - Installing the dependencies `python-dotenv`, `deta`, and `flask` via `pip install python-dotenv`, `pip install deta`, and `pip install flask` respectively
+  - Copying the `.env.example` file to `local.env` and adjust as needed
+  - Run `flask --app src.local run -p 1234`
+  - When logging in, point the URL to `http://localhost:1234`
 
 Whichever method you use to get a server, you'll need of a PTD3 SWF modified so that it can point to the right server, as well as a functional flash player.
 If you want to modify the game client yourself, see the mod_instructions.txt for instructions

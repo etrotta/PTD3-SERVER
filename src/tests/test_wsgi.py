@@ -2,7 +2,7 @@ import io
 import random
 from urllib.parse import quote
 
-from src.main import app
+from src.local import app
 
 path = '/ptd3save/username'
 

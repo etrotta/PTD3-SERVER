@@ -22,6 +22,7 @@ operations = {
     "not_contains": lambda key, value, record: value not in record.get(key),
 }
 
+
 def parse_filter(filter_: dict) -> Callable[[dict], bool]:
     result = []
     for condition, value in filter_.items():
@@ -37,7 +38,9 @@ def parse_filter(filter_: dict) -> Callable[[dict], bool]:
 
     def match_record(record: dict) -> bool:
         return all(function(record) for function in result)
+
     return match_record
+
 
 def parse_filters(filters: Optional[list[dict]]) -> Callable[[dict], bool]:
     if filters is None:
@@ -49,6 +52,7 @@ def parse_filters(filters: Optional[list[dict]]) -> Callable[[dict], bool]:
 
     return match_record
 
+
 class FetchResponse:
     def __init__(self, count=0, last=None, items=[]):
         self.count = count
@@ -57,6 +61,8 @@ class FetchResponse:
 
 
 _memory_inventory = {}
+
+
 class Base:
     def __init__(self, name: str, sync_disk: bool = False):
         self.name = name
@@ -71,7 +77,7 @@ class Base:
             obj = json.loads(obj)
         return obj
 
-    def insert(self, data, key, *, expire_in: None=None, expire_at: None=None):
+    def insert(self, data, key, *, expire_in: None = None, expire_at: None = None):
         if expire_in:
             print(f"Ignoring parameter (not supported by local base): {expire_in=}")
         if expire_at:
@@ -96,11 +102,11 @@ class Base:
                 obj[attribute].extend(value.val)
             elif isinstance(value, Util.Prepend):
                 obj[attribute] = (
-                    value.val + obj[attribute]
+                        value.val + obj[attribute]
                 )
             else:
                 obj[attribute] = value
-        
+
         self.inventory[key] = json.dumps(obj)
 
     def delete(self, key):
@@ -110,7 +116,7 @@ class Base:
         items = {record.pop('key'): json.dumps(record) for record in (item.copy() for item in items)}
         self.inventory.update(items)
 
-    def put(self, item, key, *, expire_in: None=None, expire_at: None=None):
+    def put(self, item, key, *, expire_in: None = None, expire_at: None = None):
         if expire_in:
             print(f"Ignoring parameter (not supported by local base): {expire_in=}")
         if expire_at:
@@ -133,8 +139,6 @@ class Base:
         return FetchResponse(items=results)
 
 
-
-
 bind_methods = [
     '__delitem__', '__setitem__', 'clear', 'get', 'pop', 'popitem', 'update', 'setdefault'
 ]
@@ -145,9 +149,15 @@ import os
 
 class DiskBaseBackend(dict, metaclass=BoundMeta, bind_methods=bind_methods):
     """Database backend that saves to disk whenever it's modified."""
+
     def __init__(self, database_name: str):
+        orm_path = os.getenv("DETA_ORM_FOLDER")
+
+        if not os.path.isdir(orm_path):
+            os.makedirs(orm_path)
+
         try:
-            with (pathlib.Path(os.getenv("DETA_ORM_FOLDER")) / database_name).open('r') as file:
+            with (pathlib.Path(orm_path) / database_name).open('r') as file:
                 super().__init__(json.load(file))
         except Exception:
             super().__init__()
@@ -162,7 +172,6 @@ class DiskBaseBackend(dict, metaclass=BoundMeta, bind_methods=bind_methods):
                 "indent": None,
                 "separators": (',', ':'),
             }
-
 
     def _sync(self, method, value, *args, **kwargs):
         with (pathlib.Path(os.getenv("DETA_ORM_FOLDER")) / self._file_name).open('w') as file:

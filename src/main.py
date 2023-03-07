@@ -1,56 +1,37 @@
-from pathlib import Path
+try:
+    import dotenv
 
-from src.request_handler import (
-    Request,
-    Response,
-    handle_request,
-)
+    dotenv.load_dotenv(__file__ + '/../local.env')
+except ImportError:
+    print("Failed to import dotenv ; will not load `local.env` even if it is present")
 
-_static_files = (
-    'index.html',
-    'style.css',
-    'mod_instructions.txt',
-)
-path = Path(__file__).parent
+from flask import Flask, render_template, request
+from src.request_handler import handle_request
 
-class App:
-    def __call__(self, data, start_response):
-        """
-        Handles incoming interaction data
-        (WSGI)
-        """
-        data["path"] = data.get("PATH_INFO").removeprefix('/') or 'index.html'
-        data["body"] = data['wsgi.input'].read().decode('UTF-8')
-
-        try:
-            # Save/Load/Delete/List saves, meant to speak with the game client
-            if data['path'].startswith('ptd3save'):  # Manage (PTD3 Story) Save
-                    response: Response = handle_request(Request(data['body']))
-                    result = response.encode()
-                    start_response('200 OK', [])
-                    return [result]
-            # Documentation
-            elif data['path'] in _static_files:
-                with open(path / data['path'], 'rb') as file:
-                    start_response('200 OK', [])
-                    return [file.read()]
-            # TODO IMPLEMENT MYSTERY GIFT?
-            elif data['path'] == 'mystery_gift':  
-                start_response('200 OK', [])
-                return []
-            # 404 Not Found
-            else:
-                start_response('404 NOT FOUND', [])
-                return ['Page not found'.encode('UTF-8')]
-
-        except Exception as err:
-            raise
-            import sys
-            error_message = f"Error {err}   Environ {data}"
-            sys.stdout.write(error_message)
-            sys.stderr.write(error_message)
-            start_response('500 INTERNAL SERVER ERROR', [])
-            return [error_message.encode('UTF-8')]
+app = Flask(__name__, '/')
+print("Running PTD3 Server")
 
 
-app = App()
+@app.route('/')
+@app.route('/index.html')
+def index():
+    return render_template('index.html')
+
+
+# Manage (PTD3 Story) Save
+# For original SWF
+@app.route('/php/ptd3_save_1.php', methods=['GET', 'POST'])
+# For etrotta SWF
+@app.route('/ptd3save/<username>', methods=['GET', 'POST'])
+def ptd_save(username=None):
+    # Save/Load/Delete/List saves, meant to speak with the game client
+    return handle_request(request.form).encode()
+
+
+# TODO IMPLEMENT MYSTERY GIFT?
+# For original SWF
+@app.route('/ptd3/gameFiles/get_mystery_gift.php')
+# For etrotta SWF
+@app.route('/mystery_gift')
+def mystery_gift():
+    return 'mgn=0&mgs=0'

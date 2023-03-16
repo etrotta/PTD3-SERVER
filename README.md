@@ -12,9 +12,10 @@ Alternatively,
 - If you are not afraid to touch the code on your own, you can clone this repository and run it locally by:
   - Cloning the repository via `git clone https://github.com/etrotta/PTD3-SERVER`
   - Installing the dependencies `python-dotenv`, `deta`, and `flask` via `pip install python-dotenv`, `pip install deta`, and `pip install flask` respectively
-  - Copying the `.env.example` file to `local.env` and adjust as needed
-  - Run `flask --app src.local run -p 1234`
-  - When logging in, point the URL to `http://localhost:1234`
+  - Copy the `.env.example` file to `src/local.env` and edit it if you wish
+  - Run `flask --app src.main run -p 1234`
+  - When logging in, point the URL to `http://localhost:1234`. What you use for the password does not matters.
+
 
 Whichever method you use to get a server, you'll need of a PTD3 SWF modified so that it can point to the right server, as well as a functional flash player.
 If you want to modify the game client yourself, see the mod_instructions.txt for instructions
@@ -27,6 +28,7 @@ If you want to modify the game client yourself, see the mod_instructions.txt for
 
 # Contributing
 Create a GitHub Issue or contact me on Discord first.
+To run the tests, you may need to install `pip install pytest` and `pip -e .` in the project root directory
 
 # Acknowledgements
 This project wouldn't have been possible with the original game by [Samuel Otero](https://samdangames.blogspot.com/) and the [JPEXS Free Flash Decompiler](https://github.com/jindrapetrik/jpexs-decompiler).
